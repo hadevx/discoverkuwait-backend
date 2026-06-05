@@ -44,6 +44,8 @@ app.use(
       "https://auknotes.com",
       "https://admin.auknotes.com",
       "http://localhost:8081", //react native
+      "https://discoverkuwait.org",
+      "https://admin.discoverkuwait.org",
     ],
     credentials: true,
   }),
