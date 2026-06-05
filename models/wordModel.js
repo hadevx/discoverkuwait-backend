@@ -6,6 +6,7 @@ const wordSchema = new mongoose.Schema(
     kuwaitiWord: { type: String, required: true, trim: true, unique: true },
     arabicMeaning: { type: String, required: true, trim: true },
     englishMeaning: { type: String, required: true, trim: true },
+    pronunciation: { type: String, trim: true, default: "" },
     example: { type: String, trim: true, default: "" },
     category: { type: String, required: true },
     isApproved: { type: Boolean, default: false },

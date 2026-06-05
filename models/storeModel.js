@@ -11,6 +11,14 @@ const storeSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    bannerBg: {
+      type: String,
+      default: "#18181b",
+    },
+    bannerTextColor: {
+      type: String,
+      default: "#ffffff",
+    },
     price: {
       type: Number,
       default: 0,

@@ -2,7 +2,7 @@ const asyncHandler = require("../middleware/asyncHandler");
 const Word = require("../models/wordModel");
 
 const createWord = asyncHandler(async (req, res) => {
-  const { kuwaitiWord, arabicMeaning, englishMeaning, example, category, isApproved } = req.body;
+  const { kuwaitiWord, arabicMeaning, englishMeaning, pronunciation, example, category, isApproved } = req.body;
 
   if (!kuwaitiWord || !arabicMeaning || !englishMeaning || !category) {
     res.status(400);
@@ -21,6 +21,7 @@ const createWord = asyncHandler(async (req, res) => {
     kuwaitiWord: kuwaitiWord.trim(),
     arabicMeaning: arabicMeaning.trim(),
     englishMeaning: englishMeaning.trim(),
+    pronunciation: pronunciation?.trim() || "",
     example: example?.trim() || "",
     category,
     user: req.user._id,
@@ -67,7 +68,7 @@ const getWordById = asyncHandler(async (req, res) => {
 });
 
 const updateWord = asyncHandler(async (req, res) => {
-  const { kuwaitiWord, arabicMeaning, englishMeaning, example, category, isApproved } = req.body;
+  const { kuwaitiWord, arabicMeaning, englishMeaning, pronunciation, example, category, isApproved } = req.body;
 
   const word = await Word.findById(req.params.id);
   if (!word) {
@@ -78,6 +79,7 @@ const updateWord = asyncHandler(async (req, res) => {
   word.kuwaitiWord = kuwaitiWord || word.kuwaitiWord;
   word.arabicMeaning = arabicMeaning || word.arabicMeaning;
   word.englishMeaning = englishMeaning || word.englishMeaning;
+  word.pronunciation = pronunciation ?? word.pronunciation;
   word.example = example ?? word.example;
   word.category = category || word.category;
   if (isApproved !== undefined) word.isApproved = isApproved;
