@@ -80,3 +80,5 @@ const words = [
     isApproved: true,
   },
 ];
+
+module.exports = words;
