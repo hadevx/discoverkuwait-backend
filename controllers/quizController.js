@@ -43,9 +43,9 @@ const validateExamBody = (body, res) => {
 };
 
 const createQuiz = asyncHandler(async (req, res) => {
-  const { title, questions, isActive } = req.body;
+  const { title, questions, isActive, difficulty } = req.body;
   validateExamBody(req.body, res);
-  const exam = await Quiz.create({ title, questions, isActive: isActive ?? true });
+  const exam = await Quiz.create({ title, questions, isActive: isActive ?? true, difficulty: difficulty ?? "medium" });
   res.status(201).json(exam);
 });
 
@@ -55,13 +55,14 @@ const updateQuiz = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("Exam not found");
   }
-  const { title, questions, isActive } = req.body;
+  const { title, questions, isActive, difficulty } = req.body;
   if (title !== undefined || questions !== undefined) {
     validateExamBody({ title: title ?? exam.title, questions: questions ?? exam.questions }, res);
   }
   if (title !== undefined) exam.title = title;
   if (questions !== undefined) exam.questions = questions;
   if (isActive !== undefined) exam.isActive = isActive;
+  if (difficulty !== undefined) exam.difficulty = difficulty;
   const updated = await exam.save();
   res.json(updated);
 });

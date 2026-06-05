@@ -31,6 +31,7 @@ const questionSchema = new mongoose.Schema(
 const examSchema = new mongoose.Schema(
   {
     title: { type: bilingualSchema, required: true },
+    difficulty: { type: String, enum: ["easy", "medium", "hard"], default: "medium" },
     questions: {
       type: [questionSchema],
       validate: { validator: (v) => v.length >= 1 && v.length <= 5, message: "An exam must have between 1 and 5 questions" },
