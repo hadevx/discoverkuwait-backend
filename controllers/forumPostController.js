@@ -1,5 +1,6 @@
 const asyncHandler = require("../middleware/asyncHandler");
 const ForumPost = require("../models/forumPostModel");
+const User = require("../models/userModel");
 const fs = require("fs");
 const path = require("path");
 
@@ -96,7 +97,25 @@ const createPost = asyncHandler(async (req, res) => {
   });
 
   await post.populate("author", "name avatar");
-  res.status(201).json(post);
+
+  // Update streak — posting counts as daily activity
+  const user = await User.findById(req.user._id);
+  let streakData = { streak: 0, bestStreak: 0, lastQuizDate: null };
+  if (user) {
+    const today = new Date().toISOString().slice(0, 10);
+    if (user.lastQuizDate !== today) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yKey = yesterday.toISOString().slice(0, 10);
+      user.streak = user.lastQuizDate === yKey ? (user.streak || 0) + 1 : 1;
+      user.lastQuizDate = today;
+      user.bestStreak = Math.max(user.bestStreak || 0, user.streak);
+      await user.save();
+    }
+    streakData = { streak: user.streak, bestStreak: user.bestStreak, lastQuizDate: user.lastQuizDate };
+  }
+
+  res.status(201).json({ ...post.toObject(), ...streakData });
 });
 
 // PATCH /api/forum/:id/vote  (requires auth)
