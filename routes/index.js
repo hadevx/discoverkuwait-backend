@@ -8,6 +8,7 @@ const paymentRoutes = require("./paymentRoutes.js");
 const topicRoutes = require("./topicRoutes.js");
 const wordRoutes = require("./wordRoutes.js");
 const quizRoutes = require("./quizRoutes.js");
+const forumPostRoutes = require("./forumPostRoutes.js");
 
 module.exports = {
   orderRoutes,
@@ -20,4 +21,5 @@ module.exports = {
   topicRoutes,
   wordRoutes,
   quizRoutes,
+  forumPostRoutes,
 };

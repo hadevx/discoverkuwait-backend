@@ -17,6 +17,7 @@ const {
   topicRoutes,
   wordRoutes,
   quizRoutes,
+  forumPostRoutes,
 } = require("./routes/index.js");
 
 const { notFound, errorHandle } = require("./middleware/errorMiddleware.js");
@@ -62,6 +63,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/words", wordRoutes);
 app.use("/api/quiz", quizRoutes);
 app.use("/api/topics", topicRoutes);
+app.use("/api/forum", forumPostRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/update-store-status", storeRoutes);
@@ -82,6 +84,15 @@ app.use("/api/payment", paymentRoutes);
 app.use(
   "/uploads/categories",
   express.static("/app/uploads/categories", {
+    maxAge: "30d",
+    setHeaders: (res) => {
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    },
+  }),
+);
+app.use(
+  "/uploads/forum",
+  express.static("/app/uploads/forum", {
     maxAge: "30d",
     setHeaders: (res) => {
       res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
