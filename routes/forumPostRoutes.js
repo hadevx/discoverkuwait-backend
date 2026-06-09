@@ -4,13 +4,15 @@ const path = require("path");
 const fs = require("fs");
 const sharp = require("sharp");
 const router = express.Router();
-const { protectUser, protectAdmin } = require("../middleware/authMiddleware");
+const { protectUser, protectAdmin, protectUnblocked } = require("../middleware/authMiddleware");
 const {
   getPosts,
   getMyPending,
   getPendingPosts,
+  getAllPosts,
   getApprovedPosts,
   approvePost,
+  unapprovePost,
   rejectPost,
   createPost,
   toggleVote,
@@ -63,14 +65,16 @@ router.get("/", getPosts);
 
 // Auth required
 router.get("/my-pending", protectUser, getMyPending);
-router.post("/", protectUser, upload.single("image"), processImage, createPost);
-router.patch("/:id/vote", protectUser, toggleVote);
+router.post("/", protectUser, protectUnblocked, upload.single("image"), processImage, createPost);
+router.patch("/:id/vote", protectUser, protectUnblocked, toggleVote);
 router.delete("/:id", protectUser, deletePost);
 
 // Admin only
 router.get("/admin/pending", protectUser, protectAdmin, getPendingPosts);
+router.get("/admin/all", protectUser, protectAdmin, getAllPosts);
 router.get("/admin/approved", protectUser, protectAdmin, getApprovedPosts);
 router.patch("/:id/approve", protectUser, protectAdmin, approvePost);
+router.patch("/:id/unapprove", protectUser, protectAdmin, unapprovePost);
 router.delete("/:id/reject", protectUser, protectAdmin, rejectPost);
 
 module.exports = router;

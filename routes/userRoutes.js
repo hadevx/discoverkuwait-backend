@@ -9,6 +9,7 @@ const {
   logoutUser,
   getUserProfile,
   updateUserProfile,
+  updateAddress,
   getUsers,
   deleteUser,
   getUserById,
@@ -39,9 +40,7 @@ router.post("/register", registerValidation, registerUser);
 router.post("/quiz-result", protectUser, recordQuizResult);
 router.put("/progress", protectUser, updateProgress);
 router.put("/completed-quizes", protectUser, updateCompletedQuizes);
-// router.get("/address/:userId", protectUser, getAddress);
-// router.post("/address", protectUser, addressValidation, createAddress);
-// router.put("/address", protectUser, updateAddress);
+router.put("/address", protectUser, addressValidation, updateAddress);
 router.get("/profile", protectUser, getUserProfile);
 router.get("/latest", getLatestUsers);
 router.get("/leaderboard", getLeaderboard);

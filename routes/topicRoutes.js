@@ -15,19 +15,19 @@ const {
   toggleLikeTopic,
 } = require("../controllers/forumControllers.js");
 
-const { protectUser, protectAdmin } = require("../middleware/authMiddleware.js");
+const { protectUser, protectAdmin, protectUnblocked } = require("../middleware/authMiddleware.js");
 
 router.get("/", getTopics);
 
 router.get("/:id", getTopicById);
 
-router.post("/", protectUser, createTopic);
+router.post("/", protectUser, protectUnblocked, createTopic);
 
-router.put("/:topicId", protectUser, updateTopic);
+router.put("/:topicId", protectUser, protectUnblocked, updateTopic);
 
 router.delete("/:topicId", protectUser, deleteTopic);
 
-router.post("/:id/comments", protectUser, createComment);
+router.post("/:id/comments", protectUser, protectUnblocked, createComment);
 
 router.delete("/:topicId/comments/:commentId", protectUser, deleteComment);
 
@@ -38,6 +38,6 @@ router.delete("/admin/:topicId", protectUser, protectAdmin, adminDeleteTopic);
 router.delete("/admin/:topicId/comments/:commentId", protectUser, protectAdmin, adminDeleteComment);
 
 // router.put("/:id/like", protectUser, likeTopic);
-router.put("/:id/like", protectUser, toggleLikeTopic);
+router.put("/:id/like", protectUser, protectUnblocked, toggleLikeTopic);
 
 module.exports = router;

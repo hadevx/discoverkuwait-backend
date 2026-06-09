@@ -1,21 +1,44 @@
 const asyncHandler = require("../middleware/asyncHandler");
 const ForumPost = require("../models/forumPostModel");
+const Competition = require("../models/competitionModel");
 const User = require("../models/userModel");
 const fs = require("fs");
 const path = require("path");
 
-// GET /api/forum?page=1  — approved posts only
+// GET /api/forum?page=1  — approved posts, admin posts pinned first
 const getPosts = asyncHandler(async (req, res) => {
   const page = Number(req.query.page) || 1;
   const limit = 12;
   const skip = (page - 1) * limit;
 
   const [posts, total] = await Promise.all([
-    ForumPost.find({ isApproved: true })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .populate("author", "name avatar"),
+    ForumPost.aggregate([
+      { $match: { isApproved: true } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "author",
+          foreignField: "_id",
+          as: "authorData",
+        },
+      },
+      { $unwind: "$authorData" },
+      { $sort: { "authorData.isAdmin": -1, createdAt: -1 } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $project: {
+          imageUrl: 1, imageName: 1, caption: 1,
+          votes: 1, isApproved: 1, createdAt: 1,
+          author: {
+            _id: "$authorData._id",
+            name: "$authorData.name",
+            avatar: "$authorData.avatar",
+            isAdmin: "$authorData.isAdmin",
+          },
+        },
+      },
+    ]),
     ForumPost.countDocuments({ isApproved: true }),
   ]);
 
@@ -26,7 +49,7 @@ const getPosts = asyncHandler(async (req, res) => {
 const getMyPending = asyncHandler(async (req, res) => {
   const posts = await ForumPost.find({ author: req.user._id, isApproved: false })
     .sort({ createdAt: -1 })
-    .populate("author", "name avatar");
+    .populate("author", "name avatar isAdmin");
   res.json(posts);
 });
 
@@ -37,6 +60,25 @@ const getPendingPosts = asyncHandler(async (req, res) => {
     .populate("author", "name avatar")
     .populate("votes", "name avatar");
   res.json(posts);
+});
+
+// GET /api/forum/admin/all  — admin: all posts (pending + approved), paginated
+const getAllPosts = asyncHandler(async (req, res) => {
+  const page = Number(req.query.page) || 1;
+  const limit = 20;
+  const skip = (page - 1) * limit;
+
+  const [posts, total] = await Promise.all([
+    ForumPost.find({})
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("author", "name avatar")
+      .populate("votes", "name avatar"),
+    ForumPost.countDocuments({}),
+  ]);
+
+  res.json({ posts, total, page, pages: Math.ceil(total / limit) });
 });
 
 // GET /api/forum/admin/approved  — admin: all approved posts
@@ -67,6 +109,15 @@ const approvePost = asyncHandler(async (req, res) => {
   res.json({ message: "Post approved" });
 });
 
+// PATCH /api/forum/:id/unapprove  — admin: set post back to pending
+const unapprovePost = asyncHandler(async (req, res) => {
+  const post = await ForumPost.findById(req.params.id);
+  if (!post) return res.status(404).json({ message: "Post not found" });
+  post.isApproved = false;
+  await post.save();
+  res.json({ message: "Post set to pending" });
+});
+
 // DELETE /api/forum/:id/reject  — admin: reject + delete a post
 const rejectPost = asyncHandler(async (req, res) => {
   const post = await ForumPost.findById(req.params.id);
@@ -84,6 +135,11 @@ const rejectPost = asyncHandler(async (req, res) => {
 // POST /api/forum  (requires auth + image upload)
 const createPost = asyncHandler(async (req, res) => {
   if (!req.file) return res.status(400).json({ message: "Image is required" });
+
+  const comp = await Competition.findOne();
+  if (!comp?.isOpen) {
+    return res.status(403).json({ message: "Competition is currently closed" });
+  }
 
   const { caption = "" } = req.body;
   const imageUrl = `${req.protocol}://${req.get("host")}/uploads/forum/${req.file.filename}`;
@@ -161,8 +217,10 @@ module.exports = {
   getPosts,
   getMyPending,
   getPendingPosts,
+  getAllPosts,
   getApprovedPosts,
   approvePost,
+  unapprovePost,
   rejectPost,
   createPost,
   toggleVote,

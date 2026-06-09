@@ -32,6 +32,14 @@ const protectAdmin = (req, res, next) => {
   }
 };
 
+const protectUnblocked = (req, res, next) => {
+  if (req.user?.isBlocked) {
+    res.status(403);
+    throw new Error("Your account has been blocked");
+  }
+  next();
+};
+
 // Sets req.user if a valid JWT is present; skips silently if not.
 const optionalAuth = async (req, res, next) => {
   const token = req.cookies?.jwt;
@@ -43,4 +51,4 @@ const optionalAuth = async (req, res, next) => {
   next();
 };
 
-module.exports = { protectUser, protectAdmin, optionalAuth };
+module.exports = { protectUser, protectAdmin, optionalAuth, protectUnblocked };

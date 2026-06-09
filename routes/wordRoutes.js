@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { protectUser, protectAdmin, optionalAuth } = require("../middleware/authMiddleware");
+const { protectUser, protectAdmin, optionalAuth, protectUnblocked } = require("../middleware/authMiddleware");
 
 const {
   createWord,
@@ -16,9 +16,9 @@ const {
 
 router.get("/admin", protectUser, protectAdmin, getAllWords);
 router.get("/mine", protectUser, getMyWords);
-router.post("/:id/like", protectUser, likeWord);
+router.post("/:id/like", protectUser, protectUnblocked, likeWord);
 router.get("/", optionalAuth, getWords);
-router.post("/", protectUser, createWord);
+router.post("/", protectUser, protectUnblocked, createWord);
 
 router.get("/:id", getWordById);
 router.put("/:id", protectUser, protectAdmin, updateWord);

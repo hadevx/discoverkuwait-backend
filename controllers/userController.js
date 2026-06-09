@@ -1,6 +1,5 @@
 const asyncHandler = require("../middleware/asyncHandler");
 const User = require("../models/userModel");
-const Address = require("../models/addressModel");
 const generateToken = require("../utils/generateToken");
 const bcrypt = require("bcrypt");
 const { sendRestPasswordEmail } = require("../utils/emailService");
@@ -89,6 +88,7 @@ const loginUser = asyncHandler(async (req, res) => {
     name: user.name,
     email: user.email,
     phone: user.phone,
+    address: user.address,
     avatar: user.avatar,
     isAdmin: user.isAdmin,
     isBlocked: user.isBlocked,
@@ -258,6 +258,7 @@ const registerUser = asyncHandler(async (req, res) => {
     name,
     email,
     password: hashedPassword,
+    phone: req.body.phone || "",
     streak: streak || 0,
     bestStreak: bestStreak || 0,
     lastQuizDate: lastQuizDate || null,
@@ -282,6 +283,8 @@ const registerUser = asyncHandler(async (req, res) => {
     _id: user._id,
     name: user.name,
     email: user.email,
+    phone: user.phone,
+    address: user.address,
     avatar: user.avatar,
     points: user.points,
     isAdmin: user.isAdmin,
@@ -343,7 +346,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
 // @route   PUT /api/users/profile
 // @access  Private
 const updateUserProfile = asyncHandler(async (req, res) => {
-  const { name, email, phone, avatar } = req.body;
+  const { name, email, phone, avatar, address } = req.body;
 
   const user = await User.findById(req.user._id);
   if (!user) {
@@ -364,7 +367,16 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   }
 
   user.email = email || user.email;
-  user.phone = phone || user.phone;
+  if (phone !== undefined) user.phone = phone;
+  if (address && typeof address === "object") {
+    user.address = {
+      governorate: address.governorate ?? user.address.governorate,
+      city: address.city ?? user.address.city,
+      block: address.block ?? user.address.block,
+      street: address.street ?? user.address.street,
+      house: address.house ?? user.address.house,
+    };
+  }
   if (user.isAdmin) {
     user.avatar = "logo.webp";
   } else if (avatar !== undefined) {
@@ -383,6 +395,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     name: updatedUser.name,
     email: updatedUser.email,
     phone: updatedUser.phone,
+    address: updatedUser.address,
     avatar: updatedUser.avatar,
     isAdmin: updatedUser.isAdmin,
     nameLastUpdated: updatedUser.nameLastUpdated,
@@ -716,8 +729,33 @@ const getLeaderboard = asyncHandler(async (req, res) => {
   res.json(scored);
 });
 
+// @desc    Update the logged-in user's address
+// @route   PUT /api/users/address
+// @access  Private
+const updateAddress = asyncHandler(async (req, res) => {
+  const { governorate, city, block, street, house } = req.body;
+
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  user.address = {
+    governorate: governorate ?? user.address.governorate,
+    city: city ?? user.address.city,
+    block: block ?? user.address.block,
+    street: street ?? user.address.street,
+    house: house ?? user.address.house,
+  };
+
+  const saved = await user.save();
+  res.status(200).json({ address: saved.address });
+});
+
 module.exports = {
   updateCompletedQuizes,
+  updateAddress,
   loginUser,
   registerUser,
   logoutUser,

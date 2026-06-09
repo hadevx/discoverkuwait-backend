@@ -7,17 +7,18 @@ const dotenv = require("dotenv");
 const helmet = require("helmet");
 
 const {
-  productRoutes,
+  // productRoutes,
   userRoutes,
-  orderRoutes,
+  // orderRoutes,
   uploadRoutes,
   storeRoutes,
-  courseRoutes,
-  paymentRoutes,
+  // courseRoutes,
+  // paymentRoutes,
   topicRoutes,
   wordRoutes,
   quizRoutes,
   forumPostRoutes,
+  competitionRoutes,
 } = require("./routes/index.js");
 
 const { notFound, errorHandle } = require("./middleware/errorMiddleware.js");
@@ -59,17 +60,18 @@ app.use(express.urlencoded({ extended: true }));
 // Cookie parser middleware
 app.use(cookieParser());
 
-app.use("/api/products", productRoutes);
+// app.use("/api/products", productRoutes);
 app.use("/api/words", wordRoutes);
 app.use("/api/quiz", quizRoutes);
 app.use("/api/topics", topicRoutes);
 app.use("/api/forum", forumPostRoutes);
+app.use("/api/competition", competitionRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/orders", orderRoutes);
+// app.use("/api/orders", orderRoutes);
 app.use("/api/update-store-status", storeRoutes);
 app.use("/api/upload", uploadRoutes);
-app.use("/api/course", courseRoutes);
-app.use("/api/payment", paymentRoutes);
+// app.use("/api/course", courseRoutes);
+// app.use("/api/payment", paymentRoutes);
 
 /* app.use(
   "/uploads",
