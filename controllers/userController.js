@@ -356,7 +356,8 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
   if (name && name !== user.name) {
     if (user.nameLastUpdated) {
-      const daysSince = (Date.now() - new Date(user.nameLastUpdated).getTime()) / (1000 * 60 * 60 * 24);
+      const daysSince =
+        (Date.now() - new Date(user.nameLastUpdated).getTime()) / (1000 * 60 * 60 * 24);
       if (daysSince < 7) {
         res.status(400);
         throw new Error("Name can only be changed once every 7 days");
@@ -377,9 +378,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       house: address.house ?? user.address.house,
     };
   }
-  if (user.isAdmin) {
-    user.avatar = "logo.webp";
-  } else if (avatar !== undefined) {
+  if (!user.isAdmin && avatar !== undefined) {
     user.avatar = avatar;
   }
 
