@@ -355,7 +355,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   }
 
   if (name && name !== user.name) {
-    if (user.nameLastUpdated) {
+    if (!user.isAdmin && user.nameLastUpdated) {
       const daysSince =
         (Date.now() - new Date(user.nameLastUpdated).getTime()) / (1000 * 60 * 60 * 24);
       if (daysSince < 7) {
