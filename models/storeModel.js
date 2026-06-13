@@ -23,6 +23,12 @@ const storeSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    quizEnabled: { type: Boolean, default: true },
+    forumEnabled: { type: Boolean, default: true },
+    dictionaryEnabled: { type: Boolean, default: true },
+    leaderboardEnabled: { type: Boolean, default: true },
+    pointsPerCorrectAnswer: { type: Number, default: 10 },
+    forumAutoApprove: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

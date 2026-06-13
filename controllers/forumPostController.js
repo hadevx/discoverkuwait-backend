@@ -1,6 +1,7 @@
 const asyncHandler = require("../middleware/asyncHandler");
 const ForumPost = require("../models/forumPostModel");
 const Competition = require("../models/competitionModel");
+const Store = require("../models/storeModel");
 const User = require("../models/userModel");
 const fs = require("fs");
 const path = require("path");
@@ -149,7 +150,7 @@ const createPost = asyncHandler(async (req, res) => {
     imageUrl,
     imageName: req.file.filename,
     caption,
-    isApproved: false,
+    isApproved: (await Store.findOne({}))?.forumAutoApprove === true,
   });
 
   await post.populate("author", "name avatar");

@@ -1,5 +1,6 @@
 const asyncHandler = require("../middleware/asyncHandler");
 const User = require("../models/userModel");
+const Store = require("../models/storeModel");
 const generateToken = require("../utils/generateToken");
 const bcrypt = require("bcrypt");
 const { sendRestPasswordEmail } = require("../utils/emailService");
@@ -144,9 +145,12 @@ const recordQuizResult = asyncHandler(async (req, res) => {
   }
 
   // ── Aggregate stats ──
+  const storeConfig = await Store.findOne({});
+  const ptsPerAnswer = storeConfig?.pointsPerCorrectAnswer ?? 10;
+
   user.quizGamesPlayed = (user.quizGamesPlayed || 0) + 1;
   user.quizTotalCorrect = (user.quizTotalCorrect || 0) + score;
-  user.points = (user.points || 0) + score * 10; // 10 = POINTS.perCorrectAnswer
+  user.points = (user.points || 0) + score * ptsPerAnswer;
 
   // ── Best run, compared by percentage ──
   const prevPct = user.quizBestTotal ? user.quizBestScore / user.quizBestTotal : 0;
@@ -571,7 +575,7 @@ const forgetPassword = asyncHandler(async (req, res) => {
   For security, this link will expire in 15 minutes.
 
   Best regards,  
-  AUKNOTES
+  Discover Kuwait
   `,
   );
 
